@@ -62,6 +62,7 @@ namespace pdfpc {
             { "notes", 'n', 0, OptionArg.STRING, ref Options.notes_position, "Position of notes on the pdf page (either left, right, top or bottom)", "P"},
             { "persist-cache", 'p', 0, 0, ref Options.persist_cache, "Persist the PNG cache on disk for faster startup.", null },
             { "page", 'P', 0, OptionArg.INT, ref Options.page, "Goto a specific page directly after startup", "PAGE" },
+            { "config-location", 'R', 0, OptionArg.STRING, ref Options.config_location, "Full path location to a pdfrc file (e.g. ./build/withnotes.pdfpcrc).", "LOCATION"},
             { "switch-screens", 's', 0, 0, ref Options.display_switch, "Switch the presentation and the presenter screen.", null },
             { "single-screen", 'S', 0, 0, ref Options.single_screen, "Force to use only one screen", null },
             { "start-time", 't', 0, OptionArg.STRING, ref Options.start_time, "Start time of the presentation to be used as a countdown. (Format: HH:MM (24h))", "T" },
@@ -206,6 +207,15 @@ namespace pdfpc {
                 // if not found, use the legacy location
                 configFileReader.readConfig(legacyUserConfig);
                 GLib.printerr("Loaded pdfpcrc from legacy location. Please move your config file to %s\n", userConfig);
+            }
+            // then, if user specifies a config file, use that too
+            if (Options.config_location != null) {
+              var specificConfig = Path.build_filename(Options.config_location);
+              if (GLib.FileUtils.test(specificConfig, (GLib.FileTest.IS_REGULAR))) {
+                configFileReader.readConfig(specificConfig);
+              } else {
+                GLib.printerr("Unable to load pdfpcrc from %s\n. Please your options.", specificConfig);
+              }
             }
 
 #if MOVIES
